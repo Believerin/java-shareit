@@ -1,11 +1,11 @@
 package ru.practicum.shareit.user.dao;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
-@Component
+@Repository
 public class UserDbStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
@@ -16,12 +16,22 @@ public class UserDbStorage {
     }
 
     public User addUser(User user) {
+        for (User o : users.values()) {
+            if (o.getEmail().equals(user.getEmail())) {
+                return null;
+            }
+        }
         user.setId(++nextId);
         users.put(nextId, user);
         return user;
     }
 
     public User modifyUser(int userId, User user) {
+        for (User o : users.values()) {
+            if (userId != o.getId() && o.getEmail().equals(user.getEmail())) {
+                return null;
+            }
+        }
         users.put(userId, user);
         return user;
     }

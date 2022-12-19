@@ -27,19 +27,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(User user) {
-        if (userStorage.findAll().stream().anyMatch(o -> o.getEmail().equals(user.getEmail()))) {
+        User o = userStorage.addUser(user);
+        if (o == null) {
             throw new AlreadyExistsException("адрес почты уже используется");
         }
-        return userStorage.addUser(user);
+        return o;
     }
 
     @Override
     public User modifyUser(int userId, UserDto userDto) {
-        if (userStorage.findAll().stream().anyMatch(o -> o.getEmail().equals(userDto.getEmail()))) {
+        User modifyingUser = userStorage.getUser(userId);
+        User user = userStorage.modifyUser(userId, UserMapper.toUser(userId, modifyingUser, userDto));
+        if (user == null) {
             throw new AlreadyExistsException("адрес почты уже используется");
         }
-        User modifyingUser = userStorage.getUser(userId);
-        return userStorage.modifyUser(userId, UserMapper.toUser(userId, modifyingUser, userDto));
+        return user;
     }
 
     @Override

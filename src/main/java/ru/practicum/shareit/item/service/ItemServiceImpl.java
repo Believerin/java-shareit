@@ -49,7 +49,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItem(int itemId) {
-        return ItemMapper.toItemDto(itemStorage.getItem(itemId));
+        Item item = itemStorage.getItem(itemId);
+        if (item == null) {
+            throw new NoSuchBodyException("Запрашиваемый предмет");
+        }
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
