@@ -20,4 +20,11 @@ public class UserMapper {
                 userDto.getEmail() != null ? userDto.getEmail() : modifyingUser.getEmail()
         );
     }
+
+    public static User toUser(UserDto userDto) {
+        return User.builder()
+                .name(userDto.getName())
+                .email(userDto.getEmail())
+                .build();
+    }
 }

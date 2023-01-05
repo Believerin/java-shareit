@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user;
 
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
@@ -12,14 +12,11 @@ import java.util.Collection;
  * TODO Sprint add-controllers.
  */
 @RestController
+@AllArgsConstructor
 @RequestMapping(path = "/users")
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping
     public Collection<UserDto> findAll() {
@@ -27,13 +24,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
-        return userService.addUser(user);
+    public UserDto addUser(@Valid @RequestBody UserDto userDto) {
+        return userService.addUser(userDto);
     }
 
     @PatchMapping("{userId}")
-    public User modifyUser(@PathVariable int userId, @RequestBody UserDto userDto) {
-        return userService.modifyUser(userId, userDto);
+    public UserDto modifyUser(@PathVariable int userId, @RequestBody UserDto userDto) {
+        return userService.updateUser(userId, userDto);
     }
 
     @GetMapping("{userId}")

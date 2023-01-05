@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.*;
-
-import javax.validation.constraints.NotBlank;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import javax.validation.constraints.*;
+import java.util.List;
 
 /**
  * TODO Sprint add-controllers.
@@ -10,15 +12,18 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 @EqualsAndHashCode
-@RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ItemDto {
-    Integer id;
+    private Integer id;
     @NotBlank
-    String name;
-    String description;
-    Boolean available;
-    Integer request;
-
+    private String name;
+    @NotBlank
+    private String description;
+    @NotNull
+    private Boolean available;
+    private Integer request;
+    private BookingDto lastBooking;
+    private BookingDto nextBooking;
+    private List<CommentDto> comments;
 }

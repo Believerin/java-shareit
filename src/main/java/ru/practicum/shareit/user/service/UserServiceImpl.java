@@ -1,64 +1,66 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dao.UserDbStorage;
+import ru.practicum.shareit.user.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserDbStorage userStorage;
-
-    public UserServiceImpl(UserDbStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    private final UserRepository userRepository;
 
     @Override
     public Collection<UserDto> findAll() {
-        return userStorage.findAll().stream().map(UserMapper::toUserDto).collect(Collectors.toCollection(ArrayList::new));
+        return userRepository.findAllBy(UserDto.class);
     }
 
     @Override
-    public User addUser(User user) {
-        User o = userStorage.addUser(user);
-        if (o == null) {
+    public UserDto addUser(UserDto userDto) {
+        try {
+            User user = userRepository.save(UserMapper.toUser(userDto));
+            return UserMapper.toUserDto(user);
+        } catch (EmptyResultDataAccessException e) {
             throw new AlreadyExistsException("адрес почты уже используется");
         }
-        return o;
     }
 
     @Override
-    public User modifyUser(int userId, UserDto userDto) {
-        User modifyingUser = userStorage.getUser(userId);
-        User user = userStorage.modifyUser(userId, UserMapper.toUser(userId, modifyingUser, userDto));
-        if (user == null) {
-            throw new AlreadyExistsException("адрес почты уже используется");
-        }
-        return user;
-    }
-
-    @Override
-    public UserDto getUser(int userId) {
-        User user = userStorage.getUser(userId);
-        if (user == null) {
+    public UserDto updateUser(int userId, UserDto userDto) {
+        User modifyingUser;
+        Optional<User> o = userRepository.findById(userId);
+        if (o.isPresent()) {
+            modifyingUser = o.get();
+        } else {
             throw new NoSuchBodyException("Запрашиваемый пользователь");
         }
-        return UserMapper.toUserDto(user);
+        try {
+            User user = UserMapper.toUser(userId, modifyingUser, userDto);
+            return UserMapper.toUserDto(userRepository.save(user));
+        } catch (EmptyResultDataAccessException e) {
+            throw new AlreadyExistsException("адрес почты уже используется");
+        }
     }
+
+    @Override
+    public UserDto getUser(int id) {
+        Optional<User> o = userRepository.findById(id);
+        if (o.isPresent()) {
+            return UserMapper.toUserDto(o.get());
+        } else {
+            throw new NoSuchBodyException("Запрашиваемый пользователь");
+        }
+    };
 
     @Override
     public void deleteUser(int userId) {
-        User user = userStorage.getUser(userId);
-        if (user == null) {
-            throw new NoSuchBodyException("Запрашиваемый пользователь");
-        }
-        userStorage.deleteUser(userId);
+        getUser(userId);
+        userRepository.deleteById(userId);
     }
 }

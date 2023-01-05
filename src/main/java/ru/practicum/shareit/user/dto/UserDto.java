@@ -8,13 +8,12 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 @EqualsAndHashCode
-@RequiredArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-    int id;
+    private int id;
     @NotBlank
-    String name;
+    private String name;
     @Email
     @NotBlank
-    String email;
+    private String email;
 }
