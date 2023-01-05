@@ -11,6 +11,7 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     List<Item> findByOwner(int userId);
+
     @Query(value = "select new ru.practicum.shareit.item.model.Item(" +
             "i.id, i.name, i.description, i.available, i.owner, i.request) " +
             "from Item as i " +

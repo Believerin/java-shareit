@@ -31,10 +31,11 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingService bookingService;
     private final UserRepository userRepository;
+
     @Override
     public Collection<ItemDto> findAllOwn(int userId) {
         return itemRepository.findByOwner(userId).stream()
-                .map(ItemMapper :: toItemDto)
+                .map(ItemMapper::toItemDto)
                 .peek(itemDto -> {
                     Map<String, BookingDto> o = getLastAndNextBooking(itemDto.getId());
                     itemDto.setNextBooking(o.get("next"));
@@ -93,7 +94,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> searchByKeyWord(String text) {
         return text.isBlank() ? new ArrayList<>() : itemRepository.findAllByText(text.toLowerCase()).stream()
-                .map(ItemMapper :: toItemDto)
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 

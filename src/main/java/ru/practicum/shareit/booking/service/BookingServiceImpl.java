@@ -92,6 +92,7 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookingRepository.getAllBookingsByBookerOrOwner(bookerId, status, false);
     }
+
     @Override
     public Collection<BookingDto> getAllBookingsByOwner(int ownerId, String state) {
         userService.getUser(ownerId);

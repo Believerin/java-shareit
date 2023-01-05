@@ -5,7 +5,6 @@ import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 

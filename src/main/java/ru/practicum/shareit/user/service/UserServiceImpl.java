@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new NoSuchBodyException("Запрашиваемый пользователь");
         }
-    };
+    }
 
     @Override
     public void deleteUser(int userId) {
