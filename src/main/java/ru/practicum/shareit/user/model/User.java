@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.model;
 
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -12,19 +13,18 @@ import javax.validation.constraints.*;
 @Getter
 @Setter
 @EqualsAndHashCode
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "users", schema = "public")
 public class User {
+    @EqualsAndHashCode.Exclude
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @NotNull
     @NotBlank
     private String name;
     @Email
-    @NotNull
     @NotBlank
     private String email;
 }

@@ -13,8 +13,10 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class ItemDto {
+    @EqualsAndHashCode.Exclude
     private Integer id;
     @NotBlank
     private String name;

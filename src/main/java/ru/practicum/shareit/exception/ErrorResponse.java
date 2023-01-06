@@ -2,7 +2,7 @@ package ru.practicum.shareit.exception;
 
 class ErrorResponse {
 
-    String error;
+    private String error;
 
     public ErrorResponse(String error) {
         this.error = error;

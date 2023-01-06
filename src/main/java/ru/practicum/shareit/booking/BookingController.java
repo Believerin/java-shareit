@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -8,45 +8,42 @@ import ru.practicum.shareit.booking.service.BookingService;
 import javax.validation.Valid;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-bookings.
- */
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
 
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingDto addBooking(@RequestHeader("X-Sharer-User-Id") int userId,
+    public BookingDto add(@RequestHeader("X-Sharer-User-Id") int userId,
                                  @Valid @RequestBody BookingDto bookingDto) {
-        return bookingService.addBooking(bookingDto, userId);
+        return bookingService.add(bookingDto, userId);
     }
 
     @PatchMapping("{bookingId}")
-    public BookingDto acceptOrDenyBooking(@RequestParam boolean approved,
+    public BookingDto acceptOrDeny(@RequestParam boolean approved,
                                           @RequestHeader("X-Sharer-User-Id") int userId,
                                           @PathVariable int bookingId) {
-        return bookingService.acceptOrDenyBooking(bookingId, approved, userId);
+        return bookingService.acceptOrDeny(bookingId, approved, userId);
     }
 
     @GetMapping("{bookingId}")
-    public BookingDto getBooking(@RequestHeader("X-Sharer-User-Id") int userId, @PathVariable int bookingId) {
-        return bookingService.getBooking(userId, bookingId);
+    public BookingDto get(@RequestHeader("X-Sharer-User-Id") int userId, @PathVariable int bookingId) {
+        return bookingService.get(userId, bookingId);
     }
 
     @GetMapping
-    public Collection<BookingDto> getAllBookingsByBooker(@RequestHeader("X-Sharer-User-Id") int bookerId,
-                                                         @RequestParam(required = false, defaultValue = "ALL")
+    public Collection<BookingDto> getAllByBooker(@RequestHeader("X-Sharer-User-Id") int bookerId,
+                                                         @RequestParam(defaultValue = "ALL")
                                                          String state) {
-        return bookingService.getAllBookingsByBooker(bookerId, state);
+        return bookingService.getAllByBooker(bookerId, state);
     }
 
     @GetMapping("owner")
-    public Collection<BookingDto> getAllBookingsByOwner(@RequestHeader("X-Sharer-User-Id") int ownerId,
-                                                         @RequestParam(required = false, defaultValue = "ALL")
+    public Collection<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") int ownerId,
+                                                         @RequestParam(defaultValue = "ALL")
                                                          String state) {
-        return bookingService.getAllBookingsByOwner(ownerId, state);
+        return bookingService.getAllByOwner(ownerId, state);
     }
 }

@@ -11,11 +11,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode
-@RequiredArgsConstructor
-@AllArgsConstructor
-@Table(name = "comments", schema = "public")
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "comments", schema = "public")
 public class Comment {
+    @EqualsAndHashCode.Exclude
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -23,6 +24,7 @@ public class Comment {
     private String text;
     @Column(name = "item_id")
     private int item;
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User authorName;

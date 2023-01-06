@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    List<UserDto> findAllBy(Class<UserDto> type);
+  //  List<User> findAllBy();
 }

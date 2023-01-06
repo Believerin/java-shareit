@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
 
     private final UserService userService;
@@ -34,10 +36,23 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> findAllOwn(int userId) {
-        return itemRepository.findByOwner(userId).stream()
+        List<Item> itemsWithoutComments = itemRepository.findByOwner(userId);
+        List <Integer> itemIds = itemsWithoutComments.stream()
+                .mapToInt(item -> item.getId())
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        List<CommentDto> commentsOfItems = commentRepository.getCommentByItemIn(itemIds).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+        List<ItemDto> ItemsWithComments = itemsWithoutComments.stream()
                 .map(ItemMapper::toItemDto)
                 .peek(itemDto -> {
-                    Map<String, BookingDto> o = getLastAndNextBooking(itemDto.getId());
+                    List<CommentDto> comments = commentsOfItems.stream()
+                    .filter(comment -> comment.getItem() == itemDto.getId())
+                    .collect(Collectors.toList());
+                    itemDto.setComments(comments);
+                }).collect(Collectors.toList());
+        return ItemsWithComments.stream().peek(itemDto -> {
+                    Map<String, BookingDto> o = getLastAndNextBookings(itemIds).get(itemDto.getId());
                     itemDto.setNextBooking(o.get("next"));
                     itemDto.setLastBooking(o.get("last"));
                 })
@@ -45,9 +60,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto addItem(int userId, ItemDto itemDto) {
+    public ItemDto add(int userId, ItemDto itemDto) {
         try {
-            userService.getUser(userId);
+            userService.get(userId);
             Item item = itemRepository.save(ItemMapper.toItem(userId, itemDto));
             return ItemMapper.toItemDto(item);
         } catch (NoSuchBodyException e) {
@@ -55,40 +70,34 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Transactional
     @Override
-    public ItemDto updateItem(int userId, int itemId, ItemDto itemDto) {
-        Item modifyingItem;
-        Optional<Item> o = itemRepository.findById(itemId);
-        if (o.isPresent()) {
-            modifyingItem = o.get();
-            if (userId != modifyingItem.getOwner()) {
-                throw new NoAccessException("попытка редактировать чужой предмет");
-            }
-        } else {
-            throw new NoSuchBodyException("Запрашиваемый предмет");
+    public ItemDto update(int userId, int itemId, ItemDto itemDto) {
+        Item actualItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NoSuchBodyException("Запрашиваемый предмет"));
+         if (userId != actualItem.getOwner()) {
+            throw new NoAccessException("попытка редактировать чужой предмет");
         }
-        Item item = ItemMapper.toItem(userId, modifyingItem, itemDto);
-        return ItemMapper.toItemDto(itemRepository.save(item));
+        return ItemMapper.toItemDto(toItem(userId, actualItem, itemDto));
     }
 
     @Override
-    public ItemDto getItem(int userId, int itemId) {
-        Optional<Item> item = itemRepository.findById(itemId);
-        if (item.isPresent()) {
-            ItemDto itemDto = ItemMapper.toItemDto(item.get());
-            List<CommentDto> comments = commentRepository.findAllByItem(itemId, CommentDto.class).stream()
-                    .peek(commentDto -> commentDto.setAuthorName(commentDto.getAuthor().getName()))
-                    .collect(Collectors.toList());
-            itemDto.setComments(comments);
-            if (item.get().getOwner() == userId) {
-                Map<String, BookingDto> o = getLastAndNextBooking(itemDto.getId());
-                itemDto.setLastBooking(o.get("last"));
-                itemDto.setNextBooking(o.get("next"));
-            }
-            return itemDto;
-        } else {
-            throw new NoSuchBodyException("Запрашиваемый предмет");
-        }
+    public ItemDto get(int userId, int itemId) {
+       Item item = itemRepository.findById(itemId)
+               .orElseThrow(() -> new NoSuchBodyException("Запрашиваемый предмет"));
+       ItemDto itemDto = ItemMapper.toItemDto(item);
+       List<Comment> y = commentRepository.findAllByItem(itemId);
+       List<CommentDto> comments = commentRepository.findAllByItem(itemId).stream()
+                .map(CommentMapper::toCommentDto)
+            //    .peek(commentDto -> commentDto.setAuthorName(commentDto.getAuthor().getName()))
+                .collect(Collectors.toList());
+       itemDto.setComments(comments);
+       if (item.getOwner() == userId) {
+            Map<String, BookingDto> o = getLastAndNextBooking(itemDto.getId());
+            itemDto.setLastBooking(o.get("last"));
+            itemDto.setNextBooking(o.get("next"));
+       }
+       return itemDto;
     }
 
     @Override
@@ -100,7 +109,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(int authorId, int itemId, CommentDto commentDto) {
-        List<Integer> pastBookings = bookingService.getAllBookingsByBooker(authorId, "PAST").stream()
+        List<Integer> pastBookings = bookingService.getAllByBooker(authorId, "PAST").stream()
                 .mapToInt(bookingDto -> bookingDto.getItem().getId())
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         if (!pastBookings.contains(itemId)) {
@@ -122,18 +131,59 @@ public class ItemServiceImpl implements ItemService {
 
     private Map<String, BookingDto> getLastAndNextBooking(int itemId) {
         Map<String, BookingDto> nearestBookings = new HashMap<>();
-        List<Booking> o = bookingRepository.findByItemIdOrderByStartAsc(itemId);
-        Booking next = o.stream()
+        List<Booking> bookings = bookingRepository.findByItemIdOrderByStartAsc(itemId);
+        fillMapOfNearestBookingsWithValues(bookings, nearestBookings);
+        return nearestBookings;
+    }
+
+    private Map<Integer, Map<String, BookingDto>> getLastAndNextBookings(List<Integer> itemIds) {
+        Map<Integer, Map<String, BookingDto>> nearestBookingsByItemId = new HashMap<>();
+        List<Booking> bookingsByItemIds = bookingRepository.findByItemIdInOrderByStartAsc(itemIds);
+        itemIds.stream()
+                .forEach(integer -> {
+                    List<Booking> bookings = bookingsByItemIds.stream()
+                            .filter(booking -> booking.getItem().getId() == integer)
+                            .collect(Collectors.toList());
+                    Map<String, BookingDto> nearestBookings = new HashMap<>();
+                    fillMapOfNearestBookingsWithValues(bookings, nearestBookings);
+                    nearestBookingsByItemId.put(integer, nearestBookings);
+                });
+        return nearestBookingsByItemId;
+    }
+
+    private void fillMapOfNearestBookingsWithValues(List<Booking> bookings, Map<String, BookingDto> nearestBookings) {
+        Booking next = bookings.stream()
                 .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
                 .findFirst()
                 .orElse(null);
-        Booking last = o.stream()
+        Booking last = bookings.stream()
                 .sorted(Comparator.comparing(Booking::getStart).reversed())
                 .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
                 .findFirst()
                 .orElse(null);
         nearestBookings.put("next", next != null ? BookingMapper.toBookingDto(next) : null);
         nearestBookings.put("last", last != null ? BookingMapper.toBookingDto(last) : null);
-        return nearestBookings;
+    }
+
+    public static Item toItem(int userId, Item updatingItem, ItemDto itemDto) {
+        updatingItem.setId(itemDto.getId() != null ? itemDto.getId() : updatingItem.getId());
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
+            updatingItem.setName(itemDto.getName());
+        } else if (itemDto.getName() == null) {
+            updatingItem.setName(updatingItem.getName());
+        } else {
+            throw new ValidationException("имя пусто либо состоит из пробелов");
+        }
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
+            updatingItem.setDescription(itemDto.getDescription());
+        } else if (itemDto.getDescription() == null) {
+            updatingItem.setDescription(updatingItem.getDescription());
+        } else {
+            throw new ValidationException("имя пусто либо состоит из пробелов");
+        }
+        updatingItem.setAvailable(itemDto.getAvailable() != null ? itemDto.getAvailable() : updatingItem.getAvailable());
+        updatingItem.setOwner(userId);
+        updatingItem.setRequest(updatingItem.getRequest());
+        return updatingItem;
     }
 }

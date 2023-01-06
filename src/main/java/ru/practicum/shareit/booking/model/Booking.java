@@ -15,11 +15,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode
-@RequiredArgsConstructor
-@AllArgsConstructor
-@Table(name = "bookings", schema = "public")
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "bookings", schema = "public")
 public class Booking {
+    @EqualsAndHashCode.Exclude
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,9 +28,11 @@ public class Booking {
     private LocalDateTime start;
     @Column(name = "end_date")
     private LocalDateTime end;
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User booker;

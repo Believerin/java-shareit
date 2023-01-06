@@ -9,11 +9,11 @@ public interface ItemService {
 
     Collection<ItemDto> findAllOwn(int userId);
 
-    ItemDto addItem(int userId, ItemDto itemDto);
+    ItemDto add(int userId, ItemDto itemDto);
 
-    ItemDto updateItem(int userId, int itemId, ItemDto itemDto);
+    ItemDto update(int userId, int itemId, ItemDto itemDto);
 
-    ItemDto getItem(int userId, int itemId);
+    ItemDto get(int userId, int itemId);
 
     Collection<ItemDto> searchByKeyWord(String text);
 

@@ -12,11 +12,12 @@ import javax.validation.constraints.*;
 @Getter
 @Setter
 @EqualsAndHashCode
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "items", schema = "public")
 public class Item {
+    @EqualsAndHashCode.Exclude
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -31,5 +32,4 @@ public class Item {
     private int owner;
     @Column(name = "request_id")
     private Integer request;
-
 }
