@@ -37,13 +37,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> findAllOwn(int userId) {
         List<Item> itemsWithoutComments = itemRepository.findByOwner(userId);
-        List <Integer> itemIds = itemsWithoutComments.stream()
+        List<Integer> itemIds = itemsWithoutComments.stream()
                 .mapToInt(item -> item.getId())
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         List<CommentDto> commentsOfItems = commentRepository.getCommentByItemIn(itemIds).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
-        List<ItemDto> ItemsWithComments = itemsWithoutComments.stream()
+        List<ItemDto> itemsWithComments = itemsWithoutComments.stream()
                 .map(ItemMapper::toItemDto)
                 .peek(itemDto -> {
                     List<CommentDto> comments = commentsOfItems.stream()
@@ -51,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
                     .collect(Collectors.toList());
                     itemDto.setComments(comments);
                 }).collect(Collectors.toList());
-        return ItemsWithComments.stream().peek(itemDto -> {
+        return itemsWithComments.stream().peek(itemDto -> {
                     Map<String, BookingDto> o = getLastAndNextBookings(itemIds).get(itemDto.getId());
                     itemDto.setNextBooking(o.get("next"));
                     itemDto.setLastBooking(o.get("last"));

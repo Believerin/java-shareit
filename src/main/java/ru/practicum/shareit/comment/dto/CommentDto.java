@@ -1,8 +1,6 @@
 package ru.practicum.shareit.comment.dto;
 
 import lombok.*;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.*;
 import java.time.LocalDateTime;
