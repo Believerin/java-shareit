@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.status.BookingStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             nativeQuery = true)
     void accept(int bookingId, boolean approved);
 
-    List<Booking> findByItemIdOrderByStartAsc(int itemId);
+    List<Booking> findByItemIdAndStatusOrderByStartAsc(int itemId, BookingStatus status);
 
     @Query(value = "select new ru.practicum.shareit.booking.model.Booking(" +
             "b.id, b.start, b.end, b.item, b.booker, b.status) " +
@@ -46,5 +47,5 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
                 "order by b.start desc")
     List<Booking> getAllByBookerOrOwner(int bookerOrOwnerId, int status, boolean isOwner);
 
-    List<Booking> findByItemIdInOrderByStartAsc(List<Integer> itemIds);
+    List<Booking> findByItemIdInAndStatusOrderByStartAsc(List<Integer> itemIds, BookingStatus status);
 }

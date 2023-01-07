@@ -24,7 +24,6 @@ public class Comment {
     private String text;
     @Column(name = "item_id")
     private int item;
-    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User authorName;

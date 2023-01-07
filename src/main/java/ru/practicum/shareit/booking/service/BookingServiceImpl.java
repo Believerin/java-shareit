@@ -75,23 +75,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto get(int userId, int bookingId) {
-        Optional<Booking> booking = bookingRepository.find(userId, bookingId);
-        if (booking.isPresent()) {
-            return BookingMapper.toBookingDto(booking.get());
-        } else {
-            throw new NoSuchBodyException("Номер бронирования");
-        }
+        Booking booking = bookingRepository.find(userId, bookingId)
+                .orElseThrow(() -> new NoSuchBodyException("Номер бронирования"));
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
     public Collection<BookingDto> getAllByBooker(int bookerId, String state) {
         userService.get(bookerId);
-        int status;
-        try {
-            status = AppealStatus.valueOf(state).getAppealId();
-        } catch (IllegalArgumentException e) {
-            throw new UnsupportedStatusException(state);
-        }
+        int status = getStatus(state);
         return bookingRepository.getAllByBookerOrOwner(bookerId, status, false).stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
@@ -100,14 +92,21 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Collection<BookingDto> getAllByOwner(int ownerId, String state) {
         userService.get(ownerId);
+        int status = getStatus(state);
+        return bookingRepository.getAllByBookerOrOwner(ownerId, status,  true).stream()
+                .map(BookingMapper::toBookingDto)
+                .collect(Collectors.toList());
+    }
+
+    //--------------------------------------Служебные методы-------------------------------------------------
+
+    private int getStatus(String state) {
         int status;
         try {
             status = AppealStatus.valueOf(state).getAppealId();
         } catch (IllegalArgumentException e) {
             throw new UnsupportedStatusException(state);
         }
-        return bookingRepository.getAllByBookerOrOwner(ownerId, status,  true).stream()
-                .map(BookingMapper::toBookingDto)
-                .collect(Collectors.toList());
+        return status;
     }
 }

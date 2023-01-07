@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.*;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.comment.*;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
@@ -51,10 +51,14 @@ public class ItemServiceImpl implements ItemService {
                     .collect(Collectors.toList());
                     itemDto.setComments(comments);
                 }).collect(Collectors.toList());
-        return itemsWithComments.stream().peek(itemDto -> {
-                    Map<String, BookingDto> o = getLastAndNextBookings(itemIds).get(itemDto.getId());
-                    itemDto.setNextBooking(o.get("next"));
-                    itemDto.setLastBooking(o.get("last"));
+        Map<Integer, Map<String, Booking>> nearestBookingsByItemIds = getLastAndNextBookings(itemIds);
+        return itemsWithComments.stream()
+                .peek(itemDto -> {
+                    Map<String, Booking> nearestBookingsByItemId = nearestBookingsByItemIds.get(itemDto.getId());
+                    itemDto.setNextBooking(nearestBookingsByItemId.get("next") != null
+                            ? ItemMapper.toBooking(nearestBookingsByItemId.get("next")) : null);
+                    itemDto.setLastBooking(nearestBookingsByItemId.get("last") != null
+                            ? ItemMapper.toBooking(nearestBookingsByItemId.get("last")) : null);
                 })
                 .collect(Collectors.toList());
     }
@@ -89,13 +93,14 @@ public class ItemServiceImpl implements ItemService {
        List<Comment> y = commentRepository.findAllByItem(itemId);
        List<CommentDto> comments = commentRepository.findAllByItem(itemId).stream()
                 .map(CommentMapper::toCommentDto)
-            //    .peek(commentDto -> commentDto.setAuthorName(commentDto.getAuthor().getName()))
                 .collect(Collectors.toList());
        itemDto.setComments(comments);
        if (item.getOwner() == userId) {
-            Map<String, BookingDto> o = getLastAndNextBooking(itemDto.getId());
-            itemDto.setLastBooking(o.get("last"));
-            itemDto.setNextBooking(o.get("next"));
+            Map<String, Booking> nearestBookingsByItemId = getLastAndNextBooking(itemDto.getId());
+            itemDto.setLastBooking(nearestBookingsByItemId.get("last") != null
+                    ? ItemMapper.toBooking(nearestBookingsByItemId.get("last")) : null);
+            itemDto.setNextBooking(nearestBookingsByItemId.get("next") != null
+                    ? ItemMapper.toBooking(nearestBookingsByItemId.get("next")) : null);
        }
        return itemDto;
     }
@@ -115,10 +120,7 @@ public class ItemServiceImpl implements ItemService {
         if (!pastBookings.contains(itemId)) {
             throw new ValidationException("предмет не был взят пользователем в аренду");
         }
-        Optional<Item> item = itemRepository.findById(itemId);
-        if (item.isEmpty()) {
-            throw new NoSuchBodyException("Запрашиваемый для комментария предмет");
-        }
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchBodyException("Запрашиваемый для комментария предмет"));
         Optional<User> user = userRepository.findById(authorId);
         if (user.isEmpty()) {
             throw new NoSuchBodyException("Владелец комментируемого предмета");
@@ -127,42 +129,43 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
-    //--------------------------------------Служебный метод-------------------------------------------------
+    //--------------------------------------Служебные методы-------------------------------------------------
 
-    private Map<String, BookingDto> getLastAndNextBooking(int itemId) {
-        Map<String, BookingDto> nearestBookings = new HashMap<>();
-        List<Booking> bookings = bookingRepository.findByItemIdOrderByStartAsc(itemId);
+    private Map<String, Booking> getLastAndNextBooking(int itemId) {
+        Map<String, Booking> nearestBookings = new HashMap<>();
+        List<Booking> bookings = bookingRepository.findByItemIdAndStatusOrderByStartAsc(itemId, BookingStatus.APPROVED);
         fillMapOfNearestBookingsWithValues(bookings, nearestBookings);
         return nearestBookings;
     }
 
-    private Map<Integer, Map<String, BookingDto>> getLastAndNextBookings(List<Integer> itemIds) {
-        Map<Integer, Map<String, BookingDto>> nearestBookingsByItemId = new HashMap<>();
-        List<Booking> bookingsByItemIds = bookingRepository.findByItemIdInOrderByStartAsc(itemIds);
+    private Map<Integer, Map<String, Booking>> getLastAndNextBookings(List<Integer> itemIds) {
+        Map<Integer, Map<String, Booking>> nearestBookingsByItemId = new HashMap<>();
+        List<Booking> bookingsByItemIds = bookingRepository.findByItemIdInAndStatusOrderByStartAsc(itemIds, BookingStatus.APPROVED);
         itemIds.stream()
                 .forEach(integer -> {
                     List<Booking> bookings = bookingsByItemIds.stream()
                             .filter(booking -> booking.getItem().getId() == integer)
                             .collect(Collectors.toList());
-                    Map<String, BookingDto> nearestBookings = new HashMap<>();
+                    Map<String, Booking> nearestBookings = new HashMap<>();
                     fillMapOfNearestBookingsWithValues(bookings, nearestBookings);
                     nearestBookingsByItemId.put(integer, nearestBookings);
                 });
         return nearestBookingsByItemId;
     }
 
-    private void fillMapOfNearestBookingsWithValues(List<Booking> bookings, Map<String, BookingDto> nearestBookings) {
+    private void fillMapOfNearestBookingsWithValues(List<Booking> bookings, Map<String, Booking> nearestBookings) {
         Booking next = bookings.stream()
                 .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
                 .findFirst()
                 .orElse(null);
         Booking last = bookings.stream()
                 .sorted(Comparator.comparing(Booking::getStart).reversed())
-                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
+                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now())
+                        || booking.getStart().equals(LocalDateTime.now()))
                 .findFirst()
                 .orElse(null);
-        nearestBookings.put("next", next != null ? BookingMapper.toBookingDto(next) : null);
-        nearestBookings.put("last", last != null ? BookingMapper.toBookingDto(last) : null);
+        nearestBookings.put("next", next != null ? next : null);
+        nearestBookings.put("last", last != null ? last : null);
     }
 
     public static Item toItem(int userId, Item updatingItem, ItemDto itemDto) {
