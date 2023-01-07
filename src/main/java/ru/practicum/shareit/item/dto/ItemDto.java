@@ -5,9 +5,6 @@ import ru.practicum.shareit.comment.dto.CommentDto;
 import javax.validation.constraints.*;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Getter
 @Setter
 @EqualsAndHashCode

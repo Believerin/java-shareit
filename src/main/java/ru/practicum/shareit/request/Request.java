@@ -5,16 +5,14 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Entity
 @Getter
 @Setter
 @EqualsAndHashCode
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class ItemRequest {
+@Table(name = "requests", schema = "public")
+public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

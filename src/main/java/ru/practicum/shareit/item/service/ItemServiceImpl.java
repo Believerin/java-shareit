@@ -13,6 +13,8 @@ import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoCreated;
+import ru.practicum.shareit.item.dto.ItemDtoToGet;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -64,11 +66,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto add(int userId, ItemDto itemDto) {
+    public ItemDtoCreated add(int userId, ItemDtoToGet itemDtoToGet) {
         try {
             userService.get(userId);
-            Item item = itemRepository.save(ItemMapper.toItem(userId, itemDto));
-            return ItemMapper.toItemDto(item);
+            Item item = itemRepository.save(ItemMapper.toItem(userId, itemDtoToGet));
+            return ItemMapper.toItemDtoCreated(item);
         } catch (NoSuchBodyException e) {
             throw new NoSuchBodyException("Владелец данного предмета");
         }
@@ -76,13 +78,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemDto update(int userId, int itemId, ItemDto itemDto) {
+    public ItemDtoCreated update(int userId, int itemId, ItemDtoToGet itemDtoToGet) {
         Item actualItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NoSuchBodyException("Запрашиваемый предмет"));
          if (userId != actualItem.getOwner()) {
             throw new NoAccessException("попытка редактировать чужой предмет");
         }
-        return ItemMapper.toItemDto(toItem(userId, actualItem, itemDto));
+        return ItemMapper.toItemDtoCreated(toItem(userId, actualItem, itemDtoToGet));
     }
 
     @Override
@@ -168,23 +170,23 @@ public class ItemServiceImpl implements ItemService {
         nearestBookings.put("last", last != null ? last : null);
     }
 
-    public static Item toItem(int userId, Item updatingItem, ItemDto itemDto) {
-        updatingItem.setId(itemDto.getId() != null ? itemDto.getId() : updatingItem.getId());
-        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
-            updatingItem.setName(itemDto.getName());
-        } else if (itemDto.getName() == null) {
+    public static Item toItem(int userId, Item updatingItem, ItemDtoToGet itemDtoToGet) {
+        updatingItem.setId(itemDtoToGet.getId() != null ? itemDtoToGet.getId() : updatingItem.getId());
+        if (itemDtoToGet.getName() != null && !itemDtoToGet.getName().isBlank()) {
+            updatingItem.setName(itemDtoToGet.getName());
+        } else if (itemDtoToGet.getName() == null) {
             updatingItem.setName(updatingItem.getName());
         } else {
             throw new ValidationException("имя пусто либо состоит из пробелов");
         }
-        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
-            updatingItem.setDescription(itemDto.getDescription());
-        } else if (itemDto.getDescription() == null) {
+        if (itemDtoToGet.getDescription() != null && !itemDtoToGet.getDescription().isBlank()) {
+            updatingItem.setDescription(itemDtoToGet.getDescription());
+        } else if (itemDtoToGet.getDescription() == null) {
             updatingItem.setDescription(updatingItem.getDescription());
         } else {
             throw new ValidationException("имя пусто либо состоит из пробелов");
         }
-        updatingItem.setAvailable(itemDto.getAvailable() != null ? itemDto.getAvailable() : updatingItem.getAvailable());
+        updatingItem.setAvailable(itemDtoToGet.getAvailable() != null ? itemDtoToGet.getAvailable() : updatingItem.getAvailable());
         updatingItem.setOwner(userId);
         updatingItem.setRequest(updatingItem.getRequest());
         return updatingItem;

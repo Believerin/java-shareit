@@ -22,9 +22,7 @@ public class BookingDto {
     @Future
     private LocalDateTime end;
     @NotNull
-    private Integer itemId;
     private BookingDto.Item item;
-    private Integer bookerId;
     private Booker booker;
     private BookingStatus status;
 

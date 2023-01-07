@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingDtoToGet;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -31,12 +32,12 @@ public class BookingServiceImpl implements BookingService {
     private final UserService userService;
 
     @Override
-    public BookingDto add(BookingDto bookingDto, int bookerId) {
-        if (bookingDto.getEnd().isBefore(bookingDto.getStart()) || bookingDto.getEnd().equals(bookingDto.getStart())) {
+    public BookingDto add(BookingDtoToGet bookingDtoToGet, int bookerId) {
+        if (bookingDtoToGet.getEnd().isBefore(bookingDtoToGet.getStart()) || bookingDtoToGet.getEnd().equals(bookingDtoToGet.getStart())) {
             throw new ValidationException("начало периода позже либо равно его концу");
         }
         Item itemToBook;
-        Optional<Item> actualItem = itemRepository.findById(bookingDto.getItemId());
+        Optional<Item> actualItem = itemRepository.findById(bookingDtoToGet.getItemId());
         if (actualItem.isEmpty()) {
             throw new NoSuchBodyException("Предмет для бронирования");
         } else {
@@ -55,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
         } else {
             booker = actualBooker.get();
         }
-        Booking b = BookingMapper.toBooking(bookingDto, itemToBook, booker);
+        Booking b = BookingMapper.toBooking(bookingDtoToGet, itemToBook, booker);
         b.setStatus(BookingStatus.WAITING);
         Booking booking = bookingRepository.save(b);
         return BookingMapper.toBookingDto(booking);
