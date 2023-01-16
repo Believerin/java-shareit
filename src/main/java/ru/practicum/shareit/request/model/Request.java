@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.model;
 
 import lombok.*;
 
@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @RequiredArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "requests", schema = "public")
 public class Request {
     @Id

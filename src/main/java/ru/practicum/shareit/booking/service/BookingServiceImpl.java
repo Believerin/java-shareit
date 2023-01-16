@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDtoToGet;
@@ -82,19 +84,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingDto> getAllByBooker(int bookerId, String state) {
+    public Collection<BookingDto> getAllByBooker(int bookerId, String state, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
         userService.get(bookerId);
         int status = getStatus(state);
-        return bookingRepository.getAllByBookerOrOwner(bookerId, status, false).stream()
+        return bookingRepository.getAllByBookerOrOwner(bookerId, status, false, page).stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<BookingDto> getAllByOwner(int ownerId, String state) {
+    public Collection<BookingDto> getAllByOwner(int ownerId, String state, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
         userService.get(ownerId);
         int status = getStatus(state);
-        return bookingRepository.getAllByBookerOrOwner(ownerId, status,  true).stream()
+        return bookingRepository.getAllByBookerOrOwner(ownerId, status,  true, page).stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }

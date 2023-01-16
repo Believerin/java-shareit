@@ -11,9 +11,5 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 public class RequestDto {
     @NotBlank
-    private String name;
-    @NotBlank
     private String description;
-    @NotNull
-    private boolean available;
 }

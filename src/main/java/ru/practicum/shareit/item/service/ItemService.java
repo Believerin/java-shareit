@@ -9,7 +9,7 @@ import java.util.Collection;
 
 public interface ItemService {
 
-    Collection<ItemDto> findAllOwn(int userId);
+    Collection<ItemDto> findAllOwn(int userId, int from, int size);
 
     ItemDtoCreated add(int userId, ItemDtoToGet itemDtoToGet);
 
@@ -17,7 +17,7 @@ public interface ItemService {
 
     ItemDto get(int userId, int itemId);
 
-    Collection<ItemDto> searchByKeyWord(String text);
+    Collection<ItemDto> searchByKeyWord(String text, int from, int size);
 
     CommentDto addComment(int userId, int itemId, CommentDto text);
 }

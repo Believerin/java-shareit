@@ -20,8 +20,10 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public Collection<ItemDto> findOwnAll(@RequestHeader("X-Sharer-User-Id") int userId) {
-        return itemService.findAllOwn(userId);
+    public Collection<ItemDto> findOwnAll(@RequestHeader("X-Sharer-User-Id") int userId,
+                                          @RequestParam(defaultValue = "0") int from,
+                                          @RequestParam(defaultValue = "20") int size) {
+        return itemService.findAllOwn(userId, from, size);
     }
 
     @PostMapping
@@ -40,8 +42,10 @@ public class ItemController {
     }
 
     @GetMapping("search")
-    public Collection<ItemDto> searchByKeyWord(@RequestParam String text) {
-        return itemService.searchByKeyWord(text);
+    public Collection<ItemDto> searchByKeyWord(@RequestParam String text,
+                                               @RequestParam(defaultValue = "0") int from,
+                                               @RequestParam(defaultValue = "20") int size) {
+        return itemService.searchByKeyWord(text, from, size);
     }
 
     @PostMapping("{itemId}/comment")

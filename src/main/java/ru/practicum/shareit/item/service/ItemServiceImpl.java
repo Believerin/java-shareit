@@ -1,11 +1,15 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.*;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.status.AppealStatus;
 import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.comment.*;
 import ru.practicum.shareit.comment.dto.CommentDto;
@@ -37,8 +41,10 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
 
     @Override
-    public Collection<ItemDto> findAllOwn(int userId) {
-        List<Item> itemsWithoutComments = itemRepository.findByOwner(userId);
+    public Collection<ItemDto> findAllOwn(int userId, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
+        Page<Item> itemsWithoutComments = itemRepository.findByOwner(userId, page);
+
         List<Integer> itemIds = itemsWithoutComments.stream()
                 .mapToInt(item -> item.getId())
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
@@ -108,15 +114,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> searchByKeyWord(String text) {
-        return text.isBlank() ? new ArrayList<>() : itemRepository.findAllByText(text.toLowerCase()).stream()
+    public Collection<ItemDto> searchByKeyWord(String text, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
+        return text.isBlank() ? new ArrayList<>() : itemRepository.findAllByText(text.toLowerCase(), page).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CommentDto addComment(int authorId, int itemId, CommentDto commentDto) {
-        List<Integer> pastBookings = bookingService.getAllByBooker(authorId, "PAST").stream()
+        int status = AppealStatus.valueOf("PAST").getAppealId();
+        List<Integer> pastBookings = bookingRepository.getAllByBookerOrOwner(authorId, status,  false).stream()
                 .mapToInt(bookingDto -> bookingDto.getItem().getId())
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         if (!pastBookings.contains(itemId)) {
