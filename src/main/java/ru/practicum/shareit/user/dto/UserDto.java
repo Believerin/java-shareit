@@ -9,10 +9,13 @@ import javax.validation.constraints.*;
 @Getter
 @Setter
 @EqualsAndHashCode
+@ToString
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
     @EqualsAndHashCode.Exclude
-    private int id;
+    private Integer id;
     @NotBlank(groups = Create.class)
     private String name;
     @Email(groups = {Create.class, Update.class})

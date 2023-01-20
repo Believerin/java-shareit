@@ -4,7 +4,9 @@ import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @UtilityClass
@@ -18,10 +20,11 @@ public class RequestMapper {
                 .build();
     }
 
-    public static Request toRequest(RequestDto requestDto, int requesterId) {
+    public static Request toRequest(RequestDto requestDto, User requester) {
         return Request.builder()
                 .description(requestDto.getDescription())
-                .requester(requesterId)
+                .requester(requester)
+                .created(LocalDateTime.now())
                 .build();
     }
 

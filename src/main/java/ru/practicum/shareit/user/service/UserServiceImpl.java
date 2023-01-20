@@ -1,10 +1,8 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.user.*;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -13,15 +11,12 @@ import ru.practicum.shareit.user.model.User;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//@Transactional
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    @Autowired
-    private TransactionTemplate template;
 
     @Override
     public Collection<UserDto> findAll() {
@@ -44,12 +39,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto get(int id) {
-        Optional<User> o = userRepository.findById(id);
-        if (o.isPresent()) {
-            return UserMapper.toUserDto(o.get());
-        } else {
-            throw new NoSuchBodyException("Запрашиваемый пользователь");
-        }
+        User o = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchBodyException("Запрашиваемый пользователь"));
+        return UserMapper.toUserDto(o);
     }
 
     @Transactional

@@ -10,6 +10,7 @@ import java.util.List;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Builder
 public class ItemDto {
     @EqualsAndHashCode.Exclude

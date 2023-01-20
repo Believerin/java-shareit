@@ -10,15 +10,16 @@ import javax.validation.constraints.*;
 @Getter
 @Setter
 @EqualsAndHashCode
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Table(name = "items", schema = "public")
 public class Item {
     @EqualsAndHashCode.Exclude
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @NotBlank
     private String name;
     @NotBlank
@@ -31,4 +32,12 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "request_id")
     private Request request;
+
+    public Item(int id, String name, String description, Boolean available, int owner) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.owner = owner;
+    }
 }

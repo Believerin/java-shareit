@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Builder
 public class ItemDtoCreated {
     @EqualsAndHashCode.Exclude
@@ -20,4 +21,5 @@ public class ItemDtoCreated {
     private String description;
     @NotNull
     private Boolean available;
+    private Integer requestId;
 }

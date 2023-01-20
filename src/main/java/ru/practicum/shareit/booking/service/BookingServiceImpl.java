@@ -1,14 +1,12 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dto.BookingDtoToGet;
+import ru.practicum.shareit.booking.dto.*;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.*;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.status.*;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.ItemRepository;
@@ -18,10 +16,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.springframework.transaction.annotation.Isolation.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,34 +29,25 @@ public class BookingServiceImpl implements BookingService {
     private final UserService userService;
 
     @Override
-    public BookingDto add(BookingDtoToGet bookingDtoToGet, int bookerId) {
-        if (bookingDtoToGet.getEnd().isBefore(bookingDtoToGet.getStart()) || bookingDtoToGet.getEnd().equals(bookingDtoToGet.getStart())) {
+    public BookingDto add(BookingDtoCreated bookingDtoCreated, int bookerId) {
+        if (bookingDtoCreated.getEnd().isBefore(bookingDtoCreated.getStart())
+                || bookingDtoCreated.getEnd().equals(bookingDtoCreated.getStart())) {
             throw new ValidationException("начало периода позже либо равно его концу");
         }
-        Item itemToBook;
-        Optional<Item> actualItem = itemRepository.findById(bookingDtoToGet.getItemId());
-        if (actualItem.isEmpty()) {
-            throw new NoSuchBodyException("Предмет для бронирования");
-        } else {
-            itemToBook = actualItem.get();
+        Item itemToBook = itemRepository.findById(bookingDtoCreated.getItemId())
+                .orElseThrow(() -> new NoSuchBodyException("Владелец предмета для бронирования"));;
             if (itemToBook.getOwner() == bookerId) {
                 throw new NoAccessException("бронируемый предмет в собственности бронирующего");
             }
-        }
         if (!itemToBook.getAvailable()) {
             throw new ValidationException("предмет не доступен для бронирования");
         }
-        User booker;
-        Optional<User> actualBooker = userRepository.findById(bookerId);
-        if (actualBooker.isEmpty()) {
-            throw new NoSuchBodyException("Владелец предмета для бронирования");
-        } else {
-            booker = actualBooker.get();
-        }
-        Booking b = BookingMapper.toBooking(bookingDtoToGet, itemToBook, booker);
-        b.setStatus(BookingStatus.WAITING);
-        Booking booking = bookingRepository.save(b);
-        return BookingMapper.toBookingDto(booking);
+        User booker = userRepository.findById(bookerId)
+                .orElseThrow(() -> new NoSuchBodyException("Владелец предмета для бронирования"));
+        Booking booking = BookingMapper.toBooking(bookingDtoCreated, itemToBook, booker);
+        booking.setStatus(BookingStatus.WAITING);
+        Booking savedBooking = bookingRepository.save(booking);
+        return BookingMapper.toBookingDto(savedBooking);
     }
 
     @Transactional

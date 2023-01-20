@@ -2,21 +2,24 @@ package ru.practicum.shareit.item;
 
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoCreated;
-import ru.practicum.shareit.item.dto.ItemDtoToGet;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.Request;
+
+import java.util.List;
 
 @UtilityClass
 public class ItemMapper {
 
-    public static ItemDto toItemDto(Item item) {
+    public static ItemDto toItemDto(Item item, List<CommentDto> comments) {
         return ItemDto.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
                 .request(item.getRequest() != null ? item.getRequest().getId() : null)
+                .comments(comments)
                 .build();
     }
 
@@ -26,15 +29,17 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
                 .build();
     }
 
-    public static Item toItem(int userId, ItemDtoToGet itemDtoToGet) {
+    public static Item toItem(int userId, ItemDtoCreated itemDtoCreated, Request request) {
         return Item.builder()
-                .name(itemDtoToGet.getName())
-                .description(itemDtoToGet.getDescription())
-                .available(itemDtoToGet.getAvailable())
+                .name(itemDtoCreated.getName())
+                .description(itemDtoCreated.getDescription())
+                .available(itemDtoCreated.getAvailable())
                 .owner(userId)
+                .request(request)
                 .build();
     }
 

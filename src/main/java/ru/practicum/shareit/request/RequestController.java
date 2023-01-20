@@ -2,15 +2,8 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.comment.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDto;
 
-import ru.practicum.shareit.item.dto.ItemDtoCreated;
-import ru.practicum.shareit.item.dto.ItemDtoToGet;
-import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.ResponseDto;
-import ru.practicum.shareit.request.dto.ResponseDtoCreated;
+import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.request.service.RequestService;
 
 import javax.validation.Valid;
@@ -24,9 +17,10 @@ public class RequestController {
     private final RequestService requestService;
 
     @GetMapping("all")
-    public Collection<ResponseDto> findAll(@RequestParam(defaultValue = "0") int from,
+    public Collection<ResponseDto> findAll(@RequestHeader("X-Sharer-User-Id") int userId,
+                                            @RequestParam(defaultValue = "0") int from,
                                            @RequestParam(defaultValue = "20") int size) {
-        return requestService.getAll(from, size);
+        return requestService.getAll(userId, from, size);
     }
 
     @GetMapping

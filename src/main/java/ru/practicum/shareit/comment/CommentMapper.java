@@ -21,11 +21,11 @@ public class CommentMapper {
                 .build();
     }
 
-    public static Comment toComment(User authorId, int itemId, CommentDto commentDto) {
+    public static Comment toComment(User author, int itemId, CommentDto commentDto) {
         return Comment.builder()
                 .text(commentDto.getText())
                 .item(itemId)
-                .authorName(authorId)
+                .authorName(author)
                 .created(LocalDateTime.now())
                 .build();
     }

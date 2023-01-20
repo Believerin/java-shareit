@@ -14,5 +14,5 @@ public interface RequestService {
 
     Collection<ResponseDto> getAllOwn(int userId, int from, int size);
 
-    Collection<ResponseDto> getAll( int from, int size);
+    Collection<ResponseDto> getAll(int userId, int from, int size);
 }
