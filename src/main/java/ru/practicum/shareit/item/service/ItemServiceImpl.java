@@ -132,7 +132,7 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> itemsWithComments = itemsWithoutComments.stream()
                 .map(item -> {
                     List<CommentDto> comments = commentsOfItems.stream()
-                            .filter(commentDto -> commentDto.getItem() == item.getId())
+                            .filter(commentDto -> commentDto.getItem().equals(item.getId()))
                             .collect(Collectors.toList());
                     return ItemMapper.toItemDto(item, comments);
                 }).collect(Collectors.toList());
@@ -152,7 +152,7 @@ public class ItemServiceImpl implements ItemService {
         itemIds.stream()
                 .forEach(itemId -> {
                     List<Booking> bookings = bookingsByItemIds.stream()
-                            .filter(booking -> booking.getItem().getId() == itemId)
+                            .filter(booking -> booking.getItem().getId().equals(itemId))
                             .collect(Collectors.toList());
                     Map<String, Booking> nearestBookings = new HashMap<>();
                     fillMapOfNearestBookingsWithValues(bookings, nearestBookings);
