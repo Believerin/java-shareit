@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;

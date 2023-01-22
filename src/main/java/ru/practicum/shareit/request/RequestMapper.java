@@ -1,12 +1,12 @@
 package ru.practicum.shareit.request;
 
 import lombok.experimental.UtilityClass;
+import ru.practicum.shareit.item.dto.ItemOffer;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @UtilityClass
@@ -24,11 +24,10 @@ public class RequestMapper {
         return Request.builder()
                 .description(requestDto.getDescription())
                 .requester(requester)
-                .created(LocalDateTime.now())
                 .build();
     }
 
-    public static ResponseDto toResponseDto(Request request, List<ResponseDto.ItemOffer> items) {
+    public static ResponseDto toResponseDto(Request request, List<ItemOffer> items) {
         return ResponseDto.builder()
                 .id(request.getId())
                 .description(request.getDescription())
@@ -37,8 +36,8 @@ public class RequestMapper {
                 .build();
     }
 
-    public static ResponseDto.ItemOffer toItemOffer(Item item) {
-        return ResponseDto.ItemOffer.builder()
+    public static ItemOffer toItemOffer(Item item) {
+        return ItemOffer.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())

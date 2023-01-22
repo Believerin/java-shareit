@@ -5,19 +5,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.comment.*;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
+import ru.practicum.shareit.comment.repository.CommentRepository;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
-import ru.practicum.shareit.request.RequestRepository;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.user.*;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -35,6 +38,7 @@ public class ItemJunitTest {
 	LocalDateTime localDateTime = LocalDateTime.now();
 	User user1 = new User(1, "Иван", "ivan@test.ru");
 	User user2 = new User(2, "Андрей", "andrey@test.ru");
+	UserDto userDto1 = new UserDto(1, "Иван", "ivan@test.ru");
 	Request request1 = new Request(1, "Нужна пила", user1, localDateTime.minusDays(10));
 	Request request2 = new Request(2, "Нужен чайник", user2, localDateTime.minusDays(8));
 	Item item1 = new Item(1, "Чайник", "Металлический", true, 1, request1);
@@ -50,7 +54,7 @@ public class ItemJunitTest {
 	Page page = new PageImpl<Item>(List.of(item1), pageable, size);
 
 	@Mock
-	CommentRepository mockCommentRepository;
+    CommentRepository mockCommentRepository;
 	@Mock
 	ItemRepository mockItemRepository;
 	@Mock
@@ -61,6 +65,8 @@ public class ItemJunitTest {
 	UserRepository mockUserRepository;
 	@Mock
 	UserService mockUserService;
+	@Mock
+	ItemOfferRepository mockItemOfferRepository;
 
 	@Test
 	void testAdd() {
@@ -73,7 +79,8 @@ public class ItemJunitTest {
 				.thenReturn(item1);
 		Mockito
 				.when(mockUserService.get(1))
-				.thenReturn(UserMapper.toUserDto(user1));
+				.thenReturn(userDto1);
+
 		Assertions.assertEquals(itemDtoCreated, itemService.add(1, itemDtoCreated));
 	}
 

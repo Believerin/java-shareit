@@ -46,11 +46,11 @@ public class ErrorHandler {
         return new ErrorResponse(String.format("Unknown state: %s", e.getParameter()));
     }
 
-    @ExceptionHandler
+/*    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleError(final Throwable e) {
         return new ErrorResponse(String.format("Внутренняя ошибка сервера"));
-    }
+    }*/
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

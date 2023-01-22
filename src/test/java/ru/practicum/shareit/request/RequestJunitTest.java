@@ -6,12 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.ItemOfferRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.dto.ItemOffer;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.request.service.RequestServiceImpl;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -31,6 +34,8 @@ public class RequestJunitTest {
 	@Mock
 	ItemRepository mockItemRepository;
 	@Mock
+	ItemOfferRepository mockItemOfferRepository;
+	@Mock
 	RequestRepository mockRequestRepository;
 	@Mock
 	UserRepository mockUserRepository;
@@ -42,6 +47,8 @@ public class RequestJunitTest {
 	Request request1 = new Request(1, "Нужна пила", user1, localDateTime.minusDays(10));
 	Request request2 = new Request(2, "Нужен чайник", user2, localDateTime.minusDays(8));
 	Item item2 = new Item(2, "Бензопила", "Poulan", true, 2, request1);
+	ItemOffer itemOffer = ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build();
+
 
 	int from = 0;
 	int size = 2;
@@ -64,13 +71,13 @@ public class RequestJunitTest {
 	@Test
 	void testGet() {
 		ResponseDto responseDto = new ResponseDto(1, "Нужна пила", request1.getCreated(),
-				List.of(ResponseDto.ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
+				List.of(ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
 		Mockito
 				.when(mockUserRepository.findById(1))
 				.thenReturn(Optional.of(user1));
 		Mockito
-				.when(mockItemRepository.findAllByRequestId(1))
-				.thenReturn(List.of(item2));
+				.when(mockItemOfferRepository.findAllByRequestId(1))
+				.thenReturn(List.of(itemOffer));
 		Mockito
 				.when(mockRequestRepository.findById(any()))
 				.thenReturn(Optional.of(request1));
@@ -81,10 +88,10 @@ public class RequestJunitTest {
 	void testFindAllOwn() {
 		UserDto userDto = new UserDto(1, "Иван", "ivan@test.ru");
 		ResponseDto responseDto = new ResponseDto(1, "Нужна пила", request1.getCreated(),
-				List.of(ResponseDto.ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
+				List.of(itemOffer));
 		Mockito
-				.when(mockItemRepository.findAllByRequester(1))
-				.thenReturn(List.of(item2));
+				.when(mockItemOfferRepository.findAllByRequester(1))
+				.thenReturn(List.of(itemOffer));
 		Mockito
 				.when(mockRequestRepository.findByRequesterId(1, pageableSorted))
 				.thenReturn(page);
@@ -97,10 +104,10 @@ public class RequestJunitTest {
 	@Test
 	void testGetAll() {
 		ResponseDto responseDto = new ResponseDto(1, "Нужна пила", request1.getCreated(),
-				List.of(ResponseDto.ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
+				List.of(ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
 		Mockito
-				.when(mockItemRepository.findAllWithRequests(2))
-				.thenReturn(List.of(item2));
+				.when(mockItemOfferRepository.findAllWithRequests(2))
+				.thenReturn(List.of(itemOffer));
 		Mockito
 				.when(mockRequestRepository.findByRequesterIdNot(2, pageableSorted))
 				.thenReturn(page);

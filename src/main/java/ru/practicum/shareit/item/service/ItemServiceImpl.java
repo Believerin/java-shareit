@@ -3,20 +3,23 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.*;
+import org.springframework.transaction.annotation.*;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.status.*;
 import ru.practicum.shareit.comment.*;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
+import ru.practicum.shareit.comment.repository.CommentRepository;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.RequestRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.RequestMapper;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -35,6 +38,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
+    private final ItemOfferRepository itemOfferRepository;
 
     @Override
     public Collection<ItemDto> findAllOwn(int userId, int from, int size) {
@@ -58,12 +62,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDtoCreated add(int userId, ItemDtoCreated itemDtoCreated) {
         Request request = itemDtoCreated.getRequestId() != null ? requestRepository.findById(itemDtoCreated.getRequestId())
                 .orElseThrow(() -> new NoSuchBodyException("Требуемый запрос")) : null;
         try {
             userService.get(userId);
             Item item = itemRepository.save(ItemMapper.toItem(userId, itemDtoCreated, request));
+            if (request != null) {
+                itemOfferRepository.save(RequestMapper.toItemOffer(item));
+            }
             return ItemMapper.toItemDtoCreated(item);
         } catch (NoSuchBodyException e) {
             throw new NoSuchBodyException("Владелец данного предмета");

@@ -7,7 +7,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.*;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.practicum.shareit.item.dto.ItemOffer;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
@@ -16,7 +18,6 @@ import java.util.List;
 
 @DataJpaTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ItemDataJpaTest {
     @Autowired
     private final JdbcTemplate jdbcTemplate;
@@ -24,13 +25,15 @@ public class ItemDataJpaTest {
     private TestEntityManager em;
     @Autowired
     private ItemRepository itemRepository;
+    @Autowired
+    ItemOfferRepository itemOfferRepository;
 
     User user1 = new User(null, "Иван", "ivan@test.ru");
     User user2 = new User(null, "Андрей", "andrey@test.ru");
     Item item1 = new Item(null, "Чайник", "Металлический", true, 1, null);
     Item item2 = new Item(null, "Бензопила", "Poulan", true, 2, null);
     Request request1 = new Request(null, "Нужна пила", user1, LocalDateTime.now().minusDays(10));
-
+    ItemOffer itemOffer = ItemOffer.builder().id(1).name("Бензопила").description("Poulan").available(true).requestId(1).build();
 
     @BeforeEach
     void create() {
@@ -42,7 +45,8 @@ public class ItemDataJpaTest {
 
     @AfterEach
     void delete() {
-        String sql = "DELETE FROM items CASCADE; " +
+        String sql = "DELETE FROM item_offers CASCADE; " +
+                "DELETE FROM items CASCADE; " +
                 "ALTER TABLE items ALTER COLUMN id RESTART WITH 1;" +
                 "DELETE FROM requests CASCADE; " +
                 "ALTER TABLE requests ALTER COLUMN id RESTART WITH 1;" +
@@ -65,21 +69,21 @@ public class ItemDataJpaTest {
     void testFindAllByRequester() {
         Request savedRequest1 = request1.toBuilder().id(1).build();
         em.persist(item2.toBuilder().request(savedRequest1).build());
+        em.persist(itemOffer);
+        itemRepository.findAll();
+        itemOfferRepository.findAll();
 
-        Item savedItem2 = item2.toBuilder().id(1).request(request1).build();
-
-        List<Item> items = itemRepository.findAllByRequester(1);
-        Assertions.assertEquals(List.of(savedItem2), items);
+        List<ItemOffer> items = itemOfferRepository.findAllByRequester(1);
+        Assertions.assertEquals(List.of(itemOffer), items);
     }
 
     @Test
     void testFindAllWithRequests() {
         Request savedRequest1 = request1.toBuilder().id(1).build();
         em.persist(item2.toBuilder().request(savedRequest1).build());
+        em.persist(itemOffer);
 
-        Item savedItem2 = item2.toBuilder().id(1).request(request1).build();
-
-        List<Item> items = itemRepository.findAllWithRequests(2);
-        Assertions.assertEquals(List.of(savedItem2), items);
+        List<ItemOffer> items = itemOfferRepository.findAllWithRequests(2);
+        Assertions.assertEquals(List.of(itemOffer), items);
     }
 }

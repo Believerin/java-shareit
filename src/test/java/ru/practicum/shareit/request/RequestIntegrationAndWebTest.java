@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.item.RequestController;
 import ru.practicum.shareit.item.dto.ItemDtoCreated;
+import ru.practicum.shareit.item.dto.ItemOffer;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.request.model.Request;
@@ -65,7 +66,7 @@ public class RequestIntegrationAndWebTest {
 	RequestDto requestDto = new RequestDto("Нужна пила");
 	ResponseDtoCreated responseDtoCreated = new ResponseDtoCreated(1, "Нужна пила", LocalDateTime.now().minusDays(2));
 	ResponseDto responseDto = new ResponseDto(1, "Нужна пила", LocalDateTime.now().minusDays(2),
-			List.of(ResponseDto.ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
+			List.of(ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
 
 
 	@BeforeEach

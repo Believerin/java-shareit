@@ -10,12 +10,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.*;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.booking.status.BookingStatus;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -33,7 +34,7 @@ public class BookingJunitTest {
 	@Mock
 	ItemRepository mockItemRepository;
 	@Mock
-	BookingRepository mockBookingRepository;
+    BookingRepository mockBookingRepository;
 	@Mock
 	UserRepository mockUserRepository;
 	@Mock

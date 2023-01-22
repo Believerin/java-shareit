@@ -7,6 +7,7 @@ import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.user.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,16 +18,17 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     public Collection<UserDto> findAll() {
-        return userRepository.findAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(user -> userMapper.toUserDto(user)).collect(Collectors.toList());
     }
 
     @Override
     public UserDto add(UserDto userDto) {
-        User user = userRepository.save(UserMapper.toUser(userDto));
-        return UserMapper.toUserDto(user);
+        User user = userRepository.save(userMapper.toUser(userDto));
+        return userMapper.toUserDto(user);
     }
 
     @Transactional
@@ -34,14 +36,14 @@ public class UserServiceImpl implements UserService {
     public UserDto update(int userId, UserDto userDto) {
         User actualUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchBodyException("Запрашиваемый пользователь"));
-        return UserMapper.toUserDto(toUser(userId, actualUser, userDto));
+        return userMapper.toUserDto(toUser(userId, actualUser, userDto));
     }
 
     @Override
     public UserDto get(int id) {
         User o = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchBodyException("Запрашиваемый пользователь"));
-        return UserMapper.toUserDto(o);
+        return userMapper.toUserDto(o);
     }
 
     @Transactional

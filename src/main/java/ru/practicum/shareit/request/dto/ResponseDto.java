@@ -2,6 +2,8 @@ package ru.practicum.shareit.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import ru.practicum.shareit.item.dto.ItemOffer;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -24,7 +26,7 @@ public class ResponseDto {
     private LocalDateTime created;
     private List<ItemOffer> items;
 
-    @Builder
+/*    @Builder
     @Data
     public static class ItemOffer {
         private int id;
@@ -32,5 +34,5 @@ public class ResponseDto {
         private String description;
         private boolean available;
         private int requestId;
-    }
+    }*/
 }

@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemOffer;
 import ru.practicum.shareit.request.dto.ResponseDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -50,7 +51,7 @@ public class JsonDtoTest {
             BookingDto.Booker.builder().id(1).name("Иван").build(), BookingStatus.APPROVED);
     CommentDto commentDto = new CommentDto(1, "Предмет исправен", 2, "Иван", localDateTime.minusHours(8));
     ResponseDto responseDto = new ResponseDto(1, "Нужна пила", localDateTime,
-            List.of(ResponseDto.ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
+            List.of(ItemOffer.builder().id(2).name("Бензопила").description("Poulan").available(true).requestId(1).build()));
 
     @Test
     void testItemDto() throws Exception {
