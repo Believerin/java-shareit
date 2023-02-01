@@ -140,7 +140,7 @@ public class ItemJunitTest {
 	void testAddComment() {
 		CommentDto commentDto = new CommentDto(1, "text of comment 1", 2, "Иван", localDateTime.minusHours(8));
 		Mockito
-				.when(mockBookingRepository.getAllByBookerOrOwner(anyInt(), anyInt(),anyBoolean(), any(LocalDateTime.class)))
+				.when(mockBookingRepository.getAllByBookerOrOwner(1, 3,  false))
 				.thenReturn(List.of(booking2));
 		Mockito
 				.when(mockItemRepository.findById(2))

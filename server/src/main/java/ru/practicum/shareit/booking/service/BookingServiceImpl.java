@@ -1,31 +1,21 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoCreated;
+import ru.practicum.shareit.booking.dto.*;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.status.AppealStatus;
-import ru.practicum.shareit.booking.status.BookingStatus;
-import ru.practicum.shareit.exception.NoAccessException;
-import ru.practicum.shareit.exception.NoSuchBodyException;
-import ru.practicum.shareit.exception.UnsupportedStatusException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.booking.status.*;
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -38,7 +28,6 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final UserService userService;
-    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
 
     @Transactional
     @Override
@@ -84,22 +73,20 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingDto> getAllByBooker(int bookerId, String state, int from, int size) {
-        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
-        Pageable page = PageRequest.of(from, size);
+         Pageable page = PageRequest.of(from, size);
         userService.get(bookerId);
         int status = getStatus(state);
-        return bookingRepository.getAllByBookerOrOwner(bookerId, status, false, currentTime, page).stream()
+        return bookingRepository.getAllByBookerOrOwner(bookerId, status, false, page).stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Collection<BookingDto> getAllByOwner(int ownerId, String state, int from, int size) {
-        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
         Pageable page = PageRequest.of(from, size);
         userService.get(ownerId);
         int status = getStatus(state);
-        return bookingRepository.getAllByBookerOrOwner(ownerId, status,  true, currentTime, page).stream()
+        return bookingRepository.getAllByBookerOrOwner(ownerId, status,  true, page).stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }

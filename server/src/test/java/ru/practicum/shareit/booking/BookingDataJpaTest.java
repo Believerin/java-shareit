@@ -113,9 +113,8 @@ public class BookingDataJpaTest {
                 .start(LocalDateTime.parse(booking1.getStart().format(dateFormatter), dateFormatter))
                 .end(LocalDateTime.parse(booking1.getEnd().format(dateFormatter), dateFormatter))
                 .build();
-        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
 
-        Page<Booking> page = bookingRepository.getAllByBookerOrOwner(2, 1, true, currentTime, pageable);
+        Page<Booking> page = bookingRepository.getAllByBookerOrOwner(2, 1, true, pageable);
         List<Booking> bookings = page.stream().map(booking -> booking.toBuilder()
                 .start(LocalDateTime.parse(booking.getStart().format(dateFormatter), dateFormatter))
                 .end(LocalDateTime.parse(booking.getEnd().format(dateFormatter), dateFormatter))

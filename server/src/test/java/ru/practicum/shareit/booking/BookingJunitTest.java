@@ -54,7 +54,7 @@ public class BookingJunitTest {
 	int from = 0;
 	int size = 2;
 	Pageable pageable = PageRequest.of(from, size);
-	Page page = new PageImpl<>(List.of(booking2), pageable, size);
+	Page<Booking> page = new PageImpl<>(List.of(booking2), pageable, size);
 
 
 	@Test
@@ -103,7 +103,7 @@ public class BookingJunitTest {
 				.when(mockUserService.get(1))
 				.thenReturn(bookerDto);
 		Mockito
-				.when(mockBookingRepository.getAllByBookerOrOwner(anyInt(), anyInt(), anyBoolean(), any(LocalDateTime.class), any()))
+				.when(mockBookingRepository.getAllByBookerOrOwner(1, 3, false, pageable))
 				.thenReturn(page);
 		Assertions.assertEquals(List.of(bookingDto), bookingService.getAllByBooker(1, "PAST", from, size));
 	}
@@ -118,7 +118,7 @@ public class BookingJunitTest {
 				.when(mockUserService.get(2))
 				.thenReturn(ownerDto);
 		Mockito
-				.when(mockBookingRepository.getAllByBookerOrOwner(anyInt(), anyInt(), anyBoolean(), any(LocalDateTime.class), any()))
+				.when(mockBookingRepository.getAllByBookerOrOwner(2, 3, true, pageable))
 				.thenReturn(page);
 		Assertions.assertEquals(List.of(bookingDto), bookingService.getAllByOwner(2, "PAST", from, size));
 	}

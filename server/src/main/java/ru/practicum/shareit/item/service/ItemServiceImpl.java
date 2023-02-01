@@ -25,10 +25,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,7 +41,6 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final ItemOfferRepository itemOfferRepository;
-    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
 
     @Override
     public Collection<ItemDto> findAllOwn(int userId, int from, int size) {
@@ -124,9 +120,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public CommentDto addComment(int authorId, int itemId, CommentDto commentDto) {
-        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
         int status = AppealStatus.valueOf("PAST").getAppealId();
-        List<Integer> pastBookings = bookingRepository.getAllByBookerOrOwner(authorId, status, false, currentTime).stream()
+        List<Integer> pastBookings = bookingRepository.getAllByBookerOrOwner(authorId, status, false).stream()
                 .mapToInt(bookingDto -> bookingDto.getItem().getId())
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         if (!pastBookings.contains(itemId)) {
@@ -178,15 +173,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void fillMapOfNearestBookingsWithValues(List<Booking> bookings, Map<String, Booking> nearestBookings) {
-        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
         Booking next = bookings.stream()
-                .filter(booking -> (booking.getStart().isAfter(currentTime)))
+                .filter(booking -> (booking.getStart().isAfter(LocalDateTime.now())))
                 .findFirst()
                 .orElse(null);
         Booking last = bookings.stream()
                 .sorted(Comparator.comparing(Booking::getStart).reversed())
-                .filter(booking -> (booking.getStart().isBefore(currentTime)
-                        || (booking.getStart().equals(currentTime))))
+                .filter(booking -> (booking.getStart().isBefore(LocalDateTime.now())
+                        || (booking.getStart().equals(LocalDateTime.now()))))
                 .findFirst()
                 .orElse(null);
         nearestBookings.put("next", next);
