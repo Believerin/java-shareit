@@ -45,6 +45,7 @@ public class RequestServiceImpl implements RequestService {
         this.itemOfferRepository = itemOfferRepository;
     }
 
+    @Transactional
     @Override
     public ResponseDtoCreated add(RequestDto requestDto, int requesterId) {
         User requester = userRepository.findById(requesterId)

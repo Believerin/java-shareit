@@ -47,6 +47,7 @@ public class BookingController {
                                                 @RequestParam(defaultValue = "ALL") String state,
                                                 @RequestParam(defaultValue = "0") int from,
                                                 @RequestParam(defaultValue = "20") int size) {
+        AppealStatus.getStatus(state);
         return bookingClient.getAllByOwner(ownerId, state, from, size);
     }
 }

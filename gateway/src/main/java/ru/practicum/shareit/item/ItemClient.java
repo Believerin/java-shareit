@@ -32,11 +32,11 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> update(int userId, int itemId, ItemDtoCreated itemDtoCreated) {
-        return post("/" + itemId, userId, itemDtoCreated);
+        return patch("/" + itemId, userId, itemDtoCreated);
     }
 
     public ResponseEntity<Object> get(int userId, int itemId) {
-        return post("/" + itemId, userId);
+        return get("/" + itemId, userId);
     }
 
     public ResponseEntity<Object> searchByKeyWord(int userId, String text, int from, int size) {
@@ -45,18 +45,18 @@ public class ItemClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        return get("?text={text}&from={from}&size={size}", userId, parameters);
+        return get("/search?text={text}&from={from}&size={size}", userId, parameters);
     }
 
     public ResponseEntity<Object> addComment(int userId, int itemId, CommentDto text) {
-        return post("/" + itemId, userId, text);
+        return post("/" + itemId + "/comment", userId, text);
     }
 
-    public ResponseEntity<Object> findAllOwn(int userId, int from, int size) {
+    public ResponseEntity<Object> findAllOwn(int userId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
                 "from", from,
                 "size", size
         );
-        return get("?text={text}&from={from}&size={size}", userId, parameters);
+        return get("?from={from}&size={size}", userId, parameters);
     }
 }

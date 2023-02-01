@@ -7,7 +7,6 @@ import ru.practicum.shareit.request.dto.ResponseDto;
 import ru.practicum.shareit.request.dto.ResponseDtoCreated;
 import ru.practicum.shareit.request.service.RequestService;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
@@ -32,7 +31,7 @@ public class RequestController {
     }
 
     @PostMapping
-    public ResponseDtoCreated add(@RequestHeader("X-Sharer-User-Id") int userId, @Valid @RequestBody RequestDto requestDto) {
+    public ResponseDtoCreated add(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody RequestDto requestDto) {
         return requestService.add(requestDto, userId);
     }
 

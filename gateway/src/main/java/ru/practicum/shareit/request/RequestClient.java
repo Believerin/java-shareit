@@ -8,12 +8,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
-import ru.practicum.shareit.comment.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDtoCreated;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.ResponseDto;
 
-import java.util.Collection;
 import java.util.Map;
 
 @Service
@@ -51,6 +47,6 @@ public class RequestClient extends BaseClient {
     }
 
     public ResponseEntity<Object> get(int userId, int requestId) {
-        return post("/" + requestId, userId);
+        return get("/" + requestId, userId);
     }
 }

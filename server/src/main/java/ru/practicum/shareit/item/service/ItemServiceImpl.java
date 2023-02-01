@@ -1,26 +1,21 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.status.AppealStatus;
-import ru.practicum.shareit.booking.status.BookingStatus;
+import ru.practicum.shareit.booking.status.*;
 import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.repository.CommentRepository;
 import ru.practicum.shareit.exception.NoAccessException;
-import ru.practicum.shareit.exception.NoSuchBodyException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemOfferRepository;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoCreated;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.RequestMapper;
@@ -30,7 +25,10 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,11 +44,12 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final ItemOfferRepository itemOfferRepository;
+    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
 
     @Override
     public Collection<ItemDto> findAllOwn(int userId, int from, int size) {
         Pageable page = PageRequest.of(from, size);
-        Page<Item> itemsWithoutComments = itemRepository.findByOwner(userId, page);
+        Page<Item> itemsWithoutComments = itemRepository.findByOwnerOrderByIdAsc(userId, page);
         List<Integer> itemIds = itemsWithoutComments.stream()
                 .mapToInt(item -> item.getId())
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
@@ -122,10 +121,12 @@ public class ItemServiceImpl implements ItemService {
                     .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public CommentDto addComment(int authorId, int itemId, CommentDto commentDto) {
+        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
         int status = AppealStatus.valueOf("PAST").getAppealId();
-        List<Integer> pastBookings = bookingRepository.getAllByBookerOrOwner(authorId, status, false).stream()
+        List<Integer> pastBookings = bookingRepository.getAllByBookerOrOwner(authorId, status, false, currentTime).stream()
                 .mapToInt(bookingDto -> bookingDto.getItem().getId())
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         if (!pastBookings.contains(itemId)) {
@@ -177,18 +178,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void fillMapOfNearestBookingsWithValues(List<Booking> bookings, Map<String, Booking> nearestBookings) {
+        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
         Booking next = bookings.stream()
-                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                .filter(booking -> (booking.getStart().isAfter(currentTime)))
                 .findFirst()
                 .orElse(null);
         Booking last = bookings.stream()
                 .sorted(Comparator.comparing(Booking::getStart).reversed())
-                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now())
-                        || booking.getStart().equals(LocalDateTime.now()))
+                .filter(booking -> (booking.getStart().isBefore(currentTime)
+                        || (booking.getStart().equals(currentTime))))
                 .findFirst()
                 .orElse(null);
-        nearestBookings.put("next", next != null ? next : null);
-        nearestBookings.put("last", last != null ? last : null);
+        nearestBookings.put("next", next);
+        nearestBookings.put("last", last);
     }
 
     public static Item toItem(int userId, Item updatingItem, ItemDtoCreated itemDtoCreated) {

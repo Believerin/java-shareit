@@ -26,6 +26,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll().stream().map(user -> userMapper.toUserDto(user)).collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public UserDto add(UserDto userDto) {
         User user = userRepository.save(userMapper.toUser(userDto));

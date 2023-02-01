@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.status.BookingStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +20,10 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             "from Booking as b left join Item as i on b.item.id = i.id " +
             "where " +
             "((b.status = 'APPROVED' or b.status = 'REJECTED' or b.status = 'WAITING' or b.status = 'CANCELLED') and ?2 = 1) " +
-            "or (b.end > current_timestamp and b.start < current_timestamp and ?2 = 2) " +
-            "or (b.status = 'APPROVED' and b.start < current_timestamp and b.end < current_timestamp and ?2 = 3) " +
-            "or ( b.start > current_timestamp and b.end > current_timestamp and ?2 = 4) " +
-            "or (b.status = 'WAITING'and ?2 = 5) " +
+            "or (b.end > ?4 and b.start < ?4 and ?2 = 2) " +
+            "or (b.status = 'APPROVED' and b.start < ?4 and b.end < ?4 and ?2 = 3) " +
+            "or ( b.start > ?4 and b.end > ?4 and ?2 = 4) " +
+            "or (b.status = 'WAITING' and ?2 = 5) " +
             "or (b.status = 'CANCELLED' or b.status = 'REJECTED' and ?2 = 6) " +
             "and ((b.booker.id = ?1 and ?3 = false) or (i.owner = ?1 and ?3 = true)) " +
             "order by b.start desc";
@@ -51,10 +52,10 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByItemIdAndStatusOrderByStartAsc(int itemId, BookingStatus status);
 
     @Query(value = queryGetAllByBookerOrOwner)
-    Page<Booking> getAllByBookerOrOwner(int bookerOrOwnerId, int status, boolean isOwner, Pageable pageable);
+    Page<Booking> getAllByBookerOrOwner(int bookerOrOwnerId, int status, boolean isOwner, LocalDateTime currentTime, Pageable pageable);
 
     @Query(value = queryGetAllByBookerOrOwner)
-    List<Booking> getAllByBookerOrOwner(int bookerOrOwnerId, int status, boolean isOwner);
+    List<Booking> getAllByBookerOrOwner(int bookerOrOwnerId, int status,  boolean isOwner, LocalDateTime currentTime);
 
     List<Booking> findByItemIdInAndStatusOrderByStartAsc(List<Integer> itemIds, BookingStatus status);
 }

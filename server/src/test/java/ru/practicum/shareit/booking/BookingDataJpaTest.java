@@ -5,7 +5,9 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -13,7 +15,11 @@ import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +34,8 @@ public class BookingDataJpaTest {
     private TestEntityManager em;
     @Autowired
     private BookingRepository bookingRepository;
+    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+    private static final Timestamp currentTime = Timestamp.valueOf(ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime());
 
     User user1 = new User(null, "Иван", "ivan@test.ru");
     User user2 = new User(null, "Андрей", "andrey@test.ru");
@@ -105,7 +113,9 @@ public class BookingDataJpaTest {
                 .start(LocalDateTime.parse(booking1.getStart().format(dateFormatter), dateFormatter))
                 .end(LocalDateTime.parse(booking1.getEnd().format(dateFormatter), dateFormatter))
                 .build();
-        Page<Booking> page = bookingRepository.getAllByBookerOrOwner(2, 1, true, pageable);
+        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
+
+        Page<Booking> page = bookingRepository.getAllByBookerOrOwner(2, 1, true, currentTime, pageable);
         List<Booking> bookings = page.stream().map(booking -> booking.toBuilder()
                 .start(LocalDateTime.parse(booking.getStart().format(dateFormatter), dateFormatter))
                 .end(LocalDateTime.parse(booking.getEnd().format(dateFormatter), dateFormatter))

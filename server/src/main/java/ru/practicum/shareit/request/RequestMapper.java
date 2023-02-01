@@ -9,6 +9,10 @@ import ru.practicum.shareit.request.dto.ResponseDtoCreated;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @UtilityClass
@@ -23,9 +27,12 @@ public class RequestMapper {
     }
 
     public static Request toRequest(RequestDto requestDto, User requester) {
+        ZoneId zoneId = ZoneId.of("Europe/Moscow");
+        LocalDateTime currentTime = ZonedDateTime.ofInstant(Instant.now(), zoneId).toLocalDateTime();
         return Request.builder()
                 .description(requestDto.getDescription())
                 .requester(requester)
+                .created(currentTime)
                 .build();
     }
 

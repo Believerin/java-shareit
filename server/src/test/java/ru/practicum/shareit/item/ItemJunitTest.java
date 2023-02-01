@@ -1,23 +1,30 @@
 package ru.practicum.shareit.item;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
-import ru.practicum.shareit.booking.repository.BookingRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.status.BookingStatus;
-import ru.practicum.shareit.comment.*;
+import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.repository.CommentRepository;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoCreated;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
-import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -51,7 +58,7 @@ public class ItemJunitTest {
 	int from = 0;
 	int size = 2;
 	Pageable pageable = PageRequest.of(from, size);
-	Page page = new PageImpl<Item>(List.of(item1), pageable, size);
+	Page<Item> page = new PageImpl<Item>(List.of(item1), pageable, size);
 
 	@Mock
     CommentRepository mockCommentRepository;
@@ -66,7 +73,7 @@ public class ItemJunitTest {
 	@Mock
 	UserService mockUserService;
 	@Mock
-	ItemOfferRepository mockItemOfferRepository;
+    ItemOfferRepository mockItemOfferRepository;
 
 	@Test
 	void testAdd() {
@@ -108,7 +115,7 @@ public class ItemJunitTest {
 				.when(mockCommentRepository.getCommentByItemIn(List.of(1)))
 				.thenReturn(List.of(comment2));
 		Mockito
-				.when(mockItemRepository.findByOwner(1, pageable))
+				.when(mockItemRepository.findByOwnerOrderByIdAsc(1, pageable))
 				.thenReturn(page);
 		Mockito
 				.when(mockBookingRepository.findByItemIdInAndStatusOrderByStartAsc(List.of(1), BookingStatus.APPROVED))
@@ -133,7 +140,7 @@ public class ItemJunitTest {
 	void testAddComment() {
 		CommentDto commentDto = new CommentDto(1, "text of comment 1", 2, "Иван", localDateTime.minusHours(8));
 		Mockito
-				.when(mockBookingRepository.getAllByBookerOrOwner(1, 3,  false))
+				.when(mockBookingRepository.getAllByBookerOrOwner(anyInt(), anyInt(),anyBoolean(), any(LocalDateTime.class)))
 				.thenReturn(List.of(booking2));
 		Mockito
 				.when(mockItemRepository.findById(2))

@@ -1,29 +1,35 @@
 package ru.practicum.shareit.booking;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import ru.practicum.shareit.booking.dto.*;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoCreated;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.booking.status.BookingStatus;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BookingJunitTest {
@@ -40,7 +46,6 @@ public class BookingJunitTest {
 	@Mock
 	UserService mockUserService;
 
-
 	User user1 = new User(1, "Иван", "ivan@test.ru");
 	User user2 = new User(2, "Андрей", "andrey@test.ru");
 	Request request2 = new Request(2, "Нужен чайник", user2, localDateTime.minusDays(8));
@@ -49,7 +54,7 @@ public class BookingJunitTest {
 	int from = 0;
 	int size = 2;
 	Pageable pageable = PageRequest.of(from, size);
-	Page page = new PageImpl<Booking>(List.of(booking2), pageable, size);
+	Page page = new PageImpl<>(List.of(booking2), pageable, size);
 
 
 	@Test
@@ -98,7 +103,7 @@ public class BookingJunitTest {
 				.when(mockUserService.get(1))
 				.thenReturn(bookerDto);
 		Mockito
-				.when(mockBookingRepository.getAllByBookerOrOwner(1, 3, false, pageable))
+				.when(mockBookingRepository.getAllByBookerOrOwner(anyInt(), anyInt(), anyBoolean(), any(LocalDateTime.class), any()))
 				.thenReturn(page);
 		Assertions.assertEquals(List.of(bookingDto), bookingService.getAllByBooker(1, "PAST", from, size));
 	}
@@ -113,7 +118,7 @@ public class BookingJunitTest {
 				.when(mockUserService.get(2))
 				.thenReturn(ownerDto);
 		Mockito
-				.when(mockBookingRepository.getAllByBookerOrOwner(2, 3, true, pageable))
+				.when(mockBookingRepository.getAllByBookerOrOwner(anyInt(), anyInt(), anyBoolean(), any(LocalDateTime.class), any()))
 				.thenReturn(page);
 		Assertions.assertEquals(List.of(bookingDto), bookingService.getAllByOwner(2, "PAST", from, size));
 	}
