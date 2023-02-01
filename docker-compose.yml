@@ -3,8 +3,7 @@ services:
   gateway:
     build:
       dockerfile: gateway/Dockerfile
-    image:
-      gateway_image
+    image: gateway_image
     container_name:
       gateway_container
     ports:
@@ -18,8 +17,7 @@ services:
   server:
     build:
       dockerfile: server/Dockerfile
-    image:
-      server_image
+    image: server_image
     container_name:
       server_container
     ports:
@@ -33,8 +31,7 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
   db:
-    image:
-      postgres:13.7-alpine
+    image: postgres:13.7-alpine
     volumes:
       - /var/lib/postgresql/data/
     container_name:
