@@ -2,6 +2,7 @@ version: '3.8'
 services:
   gateway:
     build:
+      context: .
       dockerfile: gateway/Dockerfile
     image: gateway_image
     container_name:
@@ -16,6 +17,7 @@ services:
 
   server:
     build:
+      context: .
       dockerfile: server/Dockerfile
     image: server_image
     container_name:
