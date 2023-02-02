@@ -3,7 +3,6 @@ package ru.practicum.shareit.comment.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Getter
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
 public class CommentDto {
     @EqualsAndHashCode.Exclude
     private Integer id;
-    @NotBlank
     private String text;
     private Integer item;
     private String authorName;

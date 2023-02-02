@@ -31,12 +31,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingDto add(BookingDtoCreated bookingDtoCreated, int bookerId) {
-        if (bookingDtoCreated.getEnd().isBefore(bookingDtoCreated.getStart())
-                || bookingDtoCreated.getEnd().equals(bookingDtoCreated.getStart())) {
+    public BookingDto add(BookingCreatedDto bookingCreatedDto, int bookerId) {
+        if (bookingCreatedDto.getEnd().isBefore(bookingCreatedDto.getStart())
+                || bookingCreatedDto.getEnd().equals(bookingCreatedDto.getStart())) {
             throw new ValidationException("начало периода позже либо равно его концу");
         }
-        Item itemToBook = itemRepository.findById(bookingDtoCreated.getItemId())
+        Item itemToBook = itemRepository.findById(bookingCreatedDto.getItemId())
                 .orElseThrow(() -> new NoSuchBodyException("Владелец предмета для бронирования"));;
             if (itemToBook.getOwner() == bookerId) {
                 throw new NoAccessException("бронируемый предмет в собственности бронирующего");
@@ -46,7 +46,7 @@ public class BookingServiceImpl implements BookingService {
         }
         User booker = userRepository.findById(bookerId)
                 .orElseThrow(() -> new NoSuchBodyException("Владелец предмета для бронирования"));
-        Booking booking = BookingMapper.toBooking(bookingDtoCreated, itemToBook, booker);
+        Booking booking = BookingMapper.toBooking(bookingCreatedDto, itemToBook, booker);
         booking.setStatus(BookingStatus.WAITING);
         Booking savedBooking = bookingRepository.save(booking);
         return BookingMapper.toBookingDto(savedBooking);

@@ -13,9 +13,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoCreated;
+import ru.practicum.shareit.booking.dto.BookingCreatedDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.status.BookingStatus;
@@ -69,7 +68,7 @@ public class BookingIntegrationAndWebTest {
 	User user2 = new User(2, "Андрей", "andrey@test.ru");
 	Item item1 = new Item(1, "Чайник", "Металлический", true, 1, null);
 	ItemDtoCreated itemDtoCreated = new ItemDtoCreated(null, "Чайник", "Металлический", true, null);
-	BookingDtoCreated bookingDtoCreated = new BookingDtoCreated(LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(7), 1);
+	BookingCreatedDto bookingCreatedDto = new BookingCreatedDto(LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(7), 1);
 	BookingDto bookingDto = new BookingDto(1, LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(7),
 			BookingDto.Item.builder().id(2).name("Бензопила").build(),
 			BookingDto.Booker.builder().id(1).name("Иван").build(), BookingStatus.APPROVED);
@@ -92,14 +91,14 @@ public class BookingIntegrationAndWebTest {
 		userService.add(userDto1);
 		userService.add(userDto2);
 		itemService.add(1, itemDtoCreated);
-		bookingService.add(bookingDtoCreated, 2);
+		bookingService.add(bookingCreatedDto, 2);
 
 		TypedQuery<Booking> query = em.createQuery("Select b from Booking b where b.booker.id = :bookerId", Booking.class);
 		Booking booking = query.setParameter("bookerId", 2).getSingleResult();
 
 		assertThat(booking.getId(), notNullValue());
-		assertThat(booking.getStart(), equalTo(bookingDtoCreated.getStart()));
-		assertThat(booking.getEnd(), equalTo(bookingDtoCreated.getEnd()));
+		assertThat(booking.getStart(), equalTo(bookingCreatedDto.getStart()));
+		assertThat(booking.getEnd(), equalTo(bookingCreatedDto.getEnd()));
 		assertThat(booking.getBooker(), equalTo(user2));
 		assertThat(booking.getItem(), equalTo(item1));
 		assertThat(booking.getStatus(), equalTo(BookingStatus.WAITING));
@@ -111,7 +110,7 @@ public class BookingIntegrationAndWebTest {
 				.thenReturn(bookingDto);
 
 		mvc.perform(post("/bookings")
-						.content(mapper.writeValueAsString(bookingDtoCreated))
+						.content(mapper.writeValueAsString(bookingCreatedDto))
 						.header("X-Sharer-User-Id", 1)
 						.characterEncoding(StandardCharsets.UTF_8)
 						.contentType(MediaType.APPLICATION_JSON)

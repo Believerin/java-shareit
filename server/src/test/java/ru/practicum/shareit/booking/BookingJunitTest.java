@@ -12,7 +12,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoCreated;
+import ru.practicum.shareit.booking.dto.BookingCreatedDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
@@ -28,8 +28,6 @@ import ru.practicum.shareit.user.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BookingJunitTest {
@@ -59,11 +57,11 @@ public class BookingJunitTest {
 
 	@Test
 	void testAdd() {
-		BookingDtoCreated bookingDtoCreated = new BookingDtoCreated(localDateTime.minusDays(6), localDateTime.minusDays(3), 2);
+		BookingCreatedDto bookingCreatedDto = new BookingCreatedDto(localDateTime.minusDays(6), localDateTime.minusDays(3), 2);
 		BookingDto bookingDto = new BookingDto(2, localDateTime.minusDays(6), localDateTime.minusDays(3),
 				BookingDto.Item.builder().id(2).name("Бензопила").build(),
 				BookingDto.Booker.builder().id(1).name("Иван").build(), BookingStatus.APPROVED);
-		Booking booking = BookingMapper.toBooking(bookingDtoCreated, item2, user1);
+		Booking booking = BookingMapper.toBooking(bookingCreatedDto, item2, user1);
 		booking.setStatus(BookingStatus.WAITING);
 		Mockito
 				.when(mockItemRepository.findById(2))
@@ -74,7 +72,7 @@ public class BookingJunitTest {
 		Mockito
 				.when(mockBookingRepository.save(booking))
 				.thenReturn(booking2);
-		Assertions.assertEquals(bookingDto, bookingService.add(bookingDtoCreated, 1));
+		Assertions.assertEquals(bookingDto, bookingService.add(bookingCreatedDto, 1));
 	}
 
 	@Test
