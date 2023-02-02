@@ -1,0 +1,19 @@
+package ru.practicum.shareit.item.dto;
+
+import lombok.*;
+
+@Getter
+@Setter
+@EqualsAndHashCode
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Builder
+public class ItemDtoCreated {
+    @EqualsAndHashCode.Exclude
+    private Integer id;
+    private String name;
+    private String description;
+    private Boolean available;
+    private Integer requestId;
+}
